@@ -37,7 +37,7 @@ This function kills the process after clearing the stack."
    (format
     "`yas-org-pretty-symbols' error, clearing stack: %s" err)))
 
-(defun yas-turn-off-org-pretty-symbols ()
+(defun yas-org-turn-off-org-pretty-symbols ()
   "Turn off org-pretty-entities when entering a snippet expansion.
 Should be added to pre-hook for yasnippet expansions"
   (push 1 yas-org-pretty-symbols-nested)
@@ -56,7 +56,7 @@ Should be added to pre-hook for yasnippet expansions"
       ;; org-pretty-entities must be off because user has them off by default
       (pop yas-org-pretty-symbols-nested))))
 
-(defun yas-turn-on-org-pretty-symbols ()
+(defun yas-org-turn-on-org-pretty-symbols ()
   "Turn on org-pretty-entities when exiting a snippet expansion.
 Should be added to post-hook for yasnippet expansions"
   ;; Should never happen
@@ -72,8 +72,40 @@ Should be added to post-hook for yasnippet expansions"
     (pop yas-org-pretty-symbols-nested)))
 
 (add-hook 'after-save-hook 'yas-org-pretty-symbols-clear-stack)
-(add-hook 'yas-before-expand-snippet-hook 'yas-turn-off-org-pretty-symbols)
-(add-hook 'yas-after-exit-snippet-hook 'yas-turn-on-org-pretty-symbols)
+(add-hook 'yas-before-expand-snippet-hook 'yas-org-turn-off-org-pretty-symbols)
+(add-hook 'yas-after-exit-snippet-hook 'yas-org-turn-on-org-pretty-symbols)
+
+    ;; This code turns off pretty symbols in org-capture. It is necessary at
+    ;; the moment due to a bug in org-mode that causes font-locking to crash
+    ;; when pretty-entities is toggled.
+
+(defvar yas-org-org-capture-bug-fix-p t
+  "Disables pretty-symbols in `org-capture' buffers to fix a font-locking bug with `org-capture'.")
+
+(defun org-capture-pretty-advice (funct &rest args)
+  "Fixes a bug in `org-capture' that breaks fontlocking via FUNCT and ARGS.
+This will turn off pretty symbols in `org-capture' buffers, and can be disabled
+with `yas-org-org-capture-bug-fix-p' set to nil."
+  (when yas-org-org-capture-bug-fix-p
+    (setq-default org-pretty-entities nil)
+    (setq-default org-pretty-entities-include-sub-superscripts nil)
+    (remove-hook 'yas-before-expand-snippet-hook 'yas-turn-off-org-pretty-symbols)
+    (remove-hook 'yas-after-exit-snippet-hook 'yas-turn-on-org-pretty-symbols)
+    (funcall funct args)))
+
+(defun org-capture-pretty-post-hook ()
+  "Fixes a bug in `org-capture' that breaks fontlocking via FUNCT and ARGS.
+This will turn off pretty symbols in `org-capture' buffers, and can be disabled
+with `yas-org-org-capture-bug-fix-p' set to nil."
+  (when yas-org-org-capture-bug-fix-p
+    (setq-default org-pretty-entities t)
+    (setq-default  org-pretty-entities-include-sub-superscripts t)
+    (add-hook 'yas-before-expand-snippet-hook 'yas-turn-off-org-pretty-symbols)
+    (add-hook 'yas-after-exit-snippet-hook 'yas-turn-on-org-pretty-symbols)))
+
+  (add-hook 'org-capture-after-finalize-hook 'org-capture-pretty-post-hook)
+  (advice-add 'org-capture :around 'org-capture-pretty-advice)
+
 
 (provide 'yas-org-pretty-symbols)
 
