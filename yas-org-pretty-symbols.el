@@ -89,8 +89,8 @@ with `yas-org-org-capture-bug-fix-p' set to nil."
   (when yas-org-org-capture-bug-fix-p
     (setq-default org-pretty-entities nil)
     (setq-default org-pretty-entities-include-sub-superscripts nil)
-    (remove-hook 'yas-before-expand-snippet-hook 'yas-turn-off-org-pretty-symbols)
-    (remove-hook 'yas-after-exit-snippet-hook 'yas-turn-on-org-pretty-symbols)
+    (remove-hook 'yas-before-expand-snippet-hook 'yas-org-turn-off-org-pretty-symbols)
+    (remove-hook 'yas-after-exit-snippet-hook 'yas-org-turn-on-org-pretty-symbols)
     (funcall funct args)))
 
 (defun org-capture-pretty-post-hook ()
@@ -100,8 +100,8 @@ with `yas-org-org-capture-bug-fix-p' set to nil."
   (when yas-org-org-capture-bug-fix-p
     (setq-default org-pretty-entities t)
     (setq-default  org-pretty-entities-include-sub-superscripts t)
-    (add-hook 'yas-before-expand-snippet-hook 'yas-turn-off-org-pretty-symbols)
-    (add-hook 'yas-after-exit-snippet-hook 'yas-turn-on-org-pretty-symbols)))
+    (add-hook 'yas-before-expand-snippet-hook 'yas-org-turn-off-org-pretty-symbols)
+    (add-hook 'yas-after-exit-snippet-hook 'yas-org-turn-on-org-pretty-symbols)))
 
   (add-hook 'org-capture-after-finalize-hook 'org-capture-pretty-post-hook)
   (advice-add 'org-capture :around 'org-capture-pretty-advice)
