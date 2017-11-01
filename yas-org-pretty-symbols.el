@@ -45,11 +45,11 @@ Should be added to pre-hook for yasnippet expansions"
       (progn
         ;; org-pretty-entities should never be on in a nested snippet
         (when (yas-org-pretty-nested-p)
-          (yas-org-pretty-crash
+          (yas-org-pretty-symbols-crash
            "`yas-org-pretty-symbols-p' while entering non-nested snippet"))
         (if yas-org-pretty-symbols-p
             ; should never be true in the first level
-            (yas-org-pretty-crash "error")
+            (yas-org-pretty-symbols-crash "error")
           (org-toggle-pretty-entities)
           (setq yas-org-pretty-symbols-p t)))
     (unless (yas-org-pretty-nested-p)
